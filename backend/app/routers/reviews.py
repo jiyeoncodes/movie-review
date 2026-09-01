@@ -13,12 +13,12 @@ router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
 @router.post(
-    "",
-    response_model=ReviewResponse,
+    "/reviews",
     status_code=201,
     summary="리뷰 등록",
-    description="리뷰를 등록하면 content(리뷰 내용)가 KoELECTRA 감성분석 모델에 자동으로 "
-    "전달되어 sentiment_label(긍정/부정)과 sentiment_score(긍정 확률)가 함께 저장됩니다.",
+    description="리뷰를 등록하면 content(리뷰 내용)가 KoELECTRA 감성분석 모델에 자동으로 전달되어 "
+                "sentiment_label(긍정/부정)과 sentiment_score(해당 라벨을 예측한 확률, 0~1)가 함께 저장됩니다. "
+                "평균 평점 계산 시에는 라벨이 '부정'이면 (1 - sentiment_score)로 환산하여 긍정 확률 기준으로 통일합니다.",
     response_description="등록된 리뷰 정보",
 )
 async def create_review(review_in: ReviewCreate, db: AsyncSession = Depends(get_db)):
