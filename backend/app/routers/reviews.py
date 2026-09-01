@@ -1,5 +1,10 @@
 # app/routers/reviews.py
-"""리뷰 라우터. 등록/평점 계산은 감성분석 조합 로직이 필요해 svc(review_svc)를 경유한다."""
+# 리뷰 관련 API 엔드포인트 정의.
+#
+# 계층 선택 기준:
+#   - 등록(POST)과 평점 계산(GET .../rating)은 "감성분석 + DB저장", "여러 리뷰 집계"처럼
+#     여러 로직을 조합해야 하므로 svc 계층(reviews_svc)을 거친다.
+#   - 나머지(단순 목록조회/단건조회/삭제)는 query 계층(reviews_query)을 직접 호출한다.
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +27,7 @@ router = APIRouter(prefix="/reviews", tags=["Reviews"])
     response_description="등록된 리뷰 정보",
 )
 async def create_review(review_in: ReviewCreate, db: AsyncSession = Depends(get_db)):
+    # 감성분석 실행 + 존재하는 영화인지 검증 + DB 저장까지 여러 단계를 조합하는 로직이라 svc 경유.
     return await reviews_svc.register_review(db, review_in)
 
 
@@ -33,6 +39,7 @@ async def create_review(review_in: ReviewCreate, db: AsyncSession = Depends(get_
     response_description="최근 리뷰 목록",
 )
 async def read_recent_reviews(skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
+    # 이 엔드포인트는 단순 조회+개수세기 조합이라 svc 없이 query를 두 번 호출하는 정도로 충분하다.
     items = await reviews_query.get_recent_reviews(db, skip=skip, limit=limit)
     total = await reviews_query.count_reviews(db)
     return {"total": total, "items": items}
@@ -58,7 +65,9 @@ async def read_reviews_by_movie(movie_id: int, db: AsyncSession = Depends(get_db
     response_description="평균 평점 및 리뷰 개수",
 )
 async def read_movie_rating(movie_id: int, db: AsyncSession = Depends(get_db)):
+    # 여러 리뷰의 점수를 모아서 평균 내는 "집계 조합 로직"이라 svc 경유.
     return await reviews_svc.get_movie_rating(db, movie_id)
+
 
 @router.get(
     "/{review_id}",

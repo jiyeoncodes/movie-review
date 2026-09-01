@@ -1,7 +1,12 @@
 # Home.py
-# streamlit run Home.py 로 실행하는 진입점.
+# Streamlit 멀티페이지 앱의 진입점. `streamlit run Home.py`로 실행한다.
+# 이 파일 자체는 화면에 안내 문구만 보여주고, 실제 기능은 pages/ 폴더의 각 파일이 담당한다.
+# (사이드바에 "Movie List", "All Reviews" 메뉴가 자동으로 생기는 이유는
+#  Streamlit이 pages/ 폴더 안 파일들을 자동으로 인식해서 메뉴로 만들어주기 때문)
+
 import streamlit as st
 
+# 브라우저 탭 제목, 아이콘, 레이아웃(wide=넓게)을 설정. 반드시 다른 st.* 호출보다 먼저 와야 함.
 st.set_page_config(page_title="영화 플랫폼", page_icon="🎬", layout="wide")
 
 st.title("🎬 영화 정보 · 리뷰 · 감성분석 플랫폼")
