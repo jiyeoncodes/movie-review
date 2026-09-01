@@ -174,6 +174,7 @@ movie-review/
 ```bash
 cd backend
 uv sync
+cp .env.example .env    # .env.example을 참고해 .env를 만들고, 안의 값을 채워넣기
 uv run python scripts/init_db.py   # 테이블 생성
 uv run uvicorn app.main:app --reload
 ```
@@ -185,6 +186,7 @@ uv run uvicorn app.main:app --reload
 ```bash
 cd frontend
 uv sync
+cp .env.example .env    # .env.example을 참고해 .env를 만들고, 안의 값을 채워넣기
 uv run streamlit run Home.py
 ```
 
@@ -205,8 +207,6 @@ uv run streamlit run Home.py
 
 - **함수 기반 코드 스타일**: FastAPI 생태계 관례에 따라 클래스 기반(CBV) 대신 함수 기반으로 통일
 - **Delete 패턴**: 실제 삭제 대신 `is_deleted` 컬럼(`'N'`/`'Y'`)으로 관리
-- **감사 컬럼**: 모든 테이블에 `created_at`, `updated_at` 포함
 - **비동기 우선**: DB 접근, API 엔드포인트 모두 `async`/`await` 사용
 - **REST 원칙 준수**: URL에 동사를 넣지 않고 HTTP 메서드로 동작을 표현
 - **svc 계층은 필요할 때만**: 여러 로직을 조합하는 경우에만 svc 사용 (예: 리뷰 등록 = 감성분석 + 저장 조합)
-- **환경변수 분리**: DB URL, API 키 등은 하드코딩 금지, `.env`는 `.gitignore`에 포함
