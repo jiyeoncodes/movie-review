@@ -340,8 +340,6 @@ def render_detail_view():
                     st.error("포스터 URL 형식이 올바르지 않습니다. 'http://' 또는 'https://'로 시작해야 합니다.")
                     st.stop()
 
-                # PATCH는 "부분 수정"이지만, 여기서는 폼에 있는 전체 필드를 그대로 보내는 방식으로 처리
-                # (백엔드는 이 값들을 그대로 덮어씀 - 이미 화면에 기존값이 채워져 있으므로 문제없음)
                 update_payload = {
                     "title": edit_title,
                     "release_date": parsed_date.isoformat(),

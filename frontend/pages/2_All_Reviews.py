@@ -23,9 +23,6 @@ def get_movie_title(movie_id: int) -> str:
         return f"(삭제된 영화, id={movie_id})"
 
 
-# 버튼 콜백: on_click으로 스크립트 재실행 "전"에 페이지 번호를 먼저 바꿔서,
-# 클릭 한 번에 불필요한 이전 페이지 조회 없이 곧바로 올바른 페이지를 조회하게 함.
-# (1_Movie_List.py의 페이지네이션과 동일한 원리)
 def go_prev_review_page():
     st.session_state.review_list_page -= 1
 
@@ -59,8 +56,6 @@ else:
             # 제목과 ID를 함께 노출한다.
             st.write(f"**영화**: {movie_title} (영화ID: {review['movie_id']})")
             st.write(f"**리뷰 작성자**: {review['author']}")
-            # 백엔드가 보내는 등록일은 "2026-08-31T17:02:27" 같은 ISO 형식이라,
-            # 중간의 'T'를 공백으로 바꿔서 사람이 읽기 편한 형태로 표시한다.
             st.write(f"**등록일**: {review['created_at'].replace('T', ' ')}")
             st.write(f"**리뷰내용**: {review['content']}")
 

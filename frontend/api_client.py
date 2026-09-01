@@ -1,22 +1,11 @@
 # frontend/api_client.py
-# 백엔드 REST API 호출 전담 모듈. UI(Streamlit) 로직은 여기 절대 포함하지 않는다.
-# 여러 페이지(pages/1_Movie_List.py, pages/2_All_Reviews.py)가 이 파일의 함수들을
-# import해서 공유하므로, 재사용 가능한 통신 함수들을 한 곳에 모아둔 것.
-#
-# requests(동기 라이브러리)를 쓰는 이유: Streamlit은 사용자가 뭔가 조작할 때마다
-# 스크립트 파일 전체를 처음부터 다시 실행하는 구조라서, 어차피 그 실행 자체가 순차적(블로킹)이다.
-# 여기서 async/httpx를 쓰면 이벤트 루프를 따로 관리해야 하는 부담만 늘고 실익이 없다.
-
 from typing import Any
 from pathlib import Path
 import os
 import requests
 from dotenv import load_dotenv
 
-# .env 파일 로드. Path(__file__).resolve().parent: 이 파일(api_client.py)이 있는 폴더를 의미.
-# 즉 frontend/.env를 정확히 지정해서, 실행 위치(터미널 현재 디렉토리)와 무관하게 항상 찾도록 함.
 load_dotenv(Path(__file__).resolve().parent / ".env")
-# .env에 API_BASE_URL이 없으면 로컬 개발 기본값(localhost:8000)을 사용
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 
@@ -74,7 +63,7 @@ def update_movie(movie_id: int, payload: dict) -> dict:
     return _handle(res)
 
 def delete_movie(movie_id: int) -> None:
-    """영화 삭제 (백엔드에서 Soft Delete 처리, 연결된 리뷰도 함께 cascade 삭제됨)"""
+    """영화 삭제 (백엔드에서 Delete 처리, 연결된 리뷰도 함께 cascade 삭제됨)"""
     res = requests.delete(f"{API_BASE_URL}/movies/{movie_id}")
     return _handle(res)
 
