@@ -85,10 +85,10 @@ def get_reviews_by_movie(movie_id: int) -> list[dict]:
     res = requests.get(f"{API_BASE_URL}/reviews/movie/{movie_id}")
     return _handle(res)
 
-def get_review(review_id: int) -> dict:
-    """리뷰 단건 조회"""
-    res = requests.get(f"{API_BASE_URL}/reviews/{review_id}")
-    return _handle(res)
+# def get_review(review_id: int) -> dict:
+#     """리뷰 단건 조회"""
+#     res = requests.get(f"{API_BASE_URL}/reviews/{review_id}")
+#     return _handle(res)
 
 def delete_review(review_id: int) -> None:
     """리뷰 삭제 (Soft Delete)"""
