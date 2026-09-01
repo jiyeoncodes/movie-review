@@ -18,7 +18,7 @@ class MovieCreate(BaseModel):
                 "release_date": "2014-11-06",
                 "director": "크리스토퍼 놀란",
                 "genre": "SF",
-                "poster_url": "https://example.com/poster/interstellar.jpg",
+                "poster_url": "https://image.tmdb.org/t/p/w500/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
             }
         }
     )
@@ -128,3 +128,16 @@ class MovieUpdate(BaseModel):
             }
         }
     )
+
+class ReviewListResponse(BaseModel):
+    total: int
+    items: list[ReviewResponse]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MovieListResponse(BaseModel):
+    total: int
+    items: list[MovieResponse]
+
+    model_config = ConfigDict(from_attributes=True)

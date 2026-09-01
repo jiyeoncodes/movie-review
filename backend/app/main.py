@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.routers import movie, review
+from app.routers import movies, reviews
 
 app = FastAPI(
     title="영화 리뷰 서비스 API",
@@ -8,5 +8,5 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.include_router(movie.router)
-app.include_router(review.router)
+app.include_router(movies.router)
+app.include_router(reviews.router)

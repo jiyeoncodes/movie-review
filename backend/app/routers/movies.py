@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.database import get_db
 from app.schema import schemas
-from app.query import movie_query
+from app.query import movies_query
 
-router = APIRouter(prefix="/movie", tags=["Movies"])
+router = APIRouter(prefix="/movies", tags=["Movies"])
 
 
 @router.post(
@@ -17,18 +17,24 @@ router = APIRouter(prefix="/movie", tags=["Movies"])
     response_description="등록된 영화 정보",
 )
 async def create_movie(movie: schemas.MovieCreate, db: AsyncSession = Depends(get_db)):
-    return await movie_query.create_movie(db, movie)
+    return await movies_query.create_movie(db, movie)
 
 
 @router.get(
     "",
-    response_model=list[schemas.MovieResponse],
+    response_model=schemas.MovieListResponse,
     summary="영화 전체 조회",
     description="모든 영화 목록을 조회합니다.",
-    response_description="영화 목록",
+    response_description="영화 목록과 전체 개수",
 )
-async def read_movies(db: AsyncSession = Depends(get_db)):
-    return await movie_query.get_movies(db)
+async def read_movies(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+):
+    items = await movies_query.get_movies(db, skip=skip, limit=limit)
+    total = await movies_query.count_movies(db)
+    return {"total": total, "items": items}
 
 
 @router.get(
@@ -40,7 +46,7 @@ async def read_movies(db: AsyncSession = Depends(get_db)):
     responses={404: {"description": "해당 movie_id의 영화가 존재하지 않거나 이미 삭제됨"}},
 )
 async def read_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
-    movie = await movie_query.get_movie(db, movie_id)
+    movie = await movies_query.get_movie(db, movie_id)
     if not movie:
         raise HTTPException(status_code=404, detail="영화를 찾을 수 없습니다.")
     return movie
@@ -58,7 +64,7 @@ async def read_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
 async def update_movie(
     movie_id: int, movie_update: schemas.MovieUpdate, db: AsyncSession = Depends(get_db)
 ):
-    movie = await movie_query.update_movie(db, movie_id, movie_update)
+    movie = await movies_query.update_movie(db, movie_id, movie_update)
     if not movie:
         raise HTTPException(status_code=404, detail="영화를 찾을 수 없습니다.")
     return movie
@@ -72,7 +78,7 @@ async def update_movie(
     responses={404: {"description": "해당 movie_id의 영화가 존재하지 않거나 이미 삭제됨"}},
 )
 async def remove_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
-    movie = await movie_query.delete_movie(db, movie_id)
+    movie = await movies_query.delete_movie(db, movie_id)
     if not movie:
         raise HTTPException(status_code=404, detail="영화를 찾을 수 없습니다.")
     return {"message": f"id={movie_id} - 영화가 삭제되었습니다."}

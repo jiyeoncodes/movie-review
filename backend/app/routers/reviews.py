@@ -1,15 +1,15 @@
-# app/routers/review.py
+# app/routers/reviews.py
 """리뷰 라우터. 등록/평점 계산은 감성분석 조합 로직이 필요해 svc(review_svc)를 경유한다."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.database import get_db
-from app.query import review_query
-from app.svc import review_svc
-from app.schema.schemas import ReviewCreate, ReviewResponse, MovieRatingResponse
+from app.query import reviews_query
+from app.svc import reviews_svc
+from app.schema.schemas import ReviewCreate, ReviewResponse, MovieRatingResponse, ReviewListResponse
 
-router = APIRouter(prefix="/review", tags=["Reviews"])
+router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
 
 @router.post(
@@ -22,21 +22,20 @@ router = APIRouter(prefix="/review", tags=["Reviews"])
     response_description="등록된 리뷰 정보",
 )
 async def create_review(review_in: ReviewCreate, db: AsyncSession = Depends(get_db)):
-    return await review_svc.register_review(db, review_in)
+    return await reviews_svc.register_review(db, review_in)
 
 
 @router.get(
     "",
-    response_model=list[ReviewResponse],
+    response_model=ReviewListResponse,
     summary="최근 리뷰 N개 조회",
     description="가장 최근에 등록된 리뷰를 최신순으로 조회합니다. 영화 구분 없이 전체 리뷰 대상입니다.",
     response_description="최근 리뷰 목록",
 )
-async def read_recent_reviews(
-    limit: int = Query(default=10, ge=1, le=100, description="조회할 리뷰 개수"),
-    db: AsyncSession = Depends(get_db),
-):
-    return await review_query.get_recent_reviews(db, limit)
+async def read_recent_reviews(skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)):
+    items = await reviews_query.get_recent_reviews(db, skip=skip, limit=limit)
+    total = await reviews_query.count_reviews(db)
+    return {"total": total, "items": items}
 
 
 @router.get(
@@ -47,7 +46,7 @@ async def read_recent_reviews(
     response_description="해당 영화의 리뷰 목록",
 )
 async def read_reviews_by_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
-    return await review_query.get_reviews_by_movie(db, movie_id)
+    return await reviews_query.get_reviews_by_movie(db, movie_id)
 
 
 @router.get(
@@ -59,8 +58,7 @@ async def read_reviews_by_movie(movie_id: int, db: AsyncSession = Depends(get_db
     response_description="평균 평점 및 리뷰 개수",
 )
 async def read_movie_rating(movie_id: int, db: AsyncSession = Depends(get_db)):
-    return await review_svc.get_movie_rating(db, movie_id)
-
+    return await reviews_svc.get_movie_rating(db, movie_id)
 
 @router.get(
     "/{review_id}",
@@ -71,7 +69,7 @@ async def read_movie_rating(movie_id: int, db: AsyncSession = Depends(get_db)):
     responses={404: {"description": "해당 review_id의 리뷰가 존재하지 않거나 이미 삭제됨"}},
 )
 async def read_review(review_id: int, db: AsyncSession = Depends(get_db)):
-    review = await review_query.get_review_by_id(db, review_id)
+    review = await reviews_query.get_review_by_id(db, review_id)
     if review is None:
         raise HTTPException(status_code=404, detail="리뷰를 찾을 수 없습니다.")
     return review
@@ -85,7 +83,7 @@ async def read_review(review_id: int, db: AsyncSession = Depends(get_db)):
     responses={404: {"description": "해당 review_id의 리뷰가 존재하지 않거나 이미 삭제됨"}},
 )
 async def delete_review(review_id: int, db: AsyncSession = Depends(get_db)):
-    review = await review_query.soft_delete_review(db, review_id)
+    review = await reviews_query.soft_delete_review(db, review_id)
     if review is None:
         raise HTTPException(status_code=404, detail="리뷰를 찾을 수 없습니다.")
     return {"message": f"id={review_id} - 리뷰가 삭제되었습니다."}
