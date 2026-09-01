@@ -103,10 +103,13 @@ def go_to_detail(movie_id):
     """상세보기 버튼 콜백: 선택한 영화 id를 저장하고 화면을 상세 화면으로 전환"""
     st.session_state.selected_movie_id = movie_id
     st.session_state.view = "detail"
+    st.query_params["movie_id"] = str(movie_id)
 
 def go_to_list():
     """"← 목록으로" 버튼 콜백: 화면을 다시 목록 화면으로 전환"""
     st.session_state.view = "list"
+    st.session_state.pop("selected_movie_id", None)
+    st.query_params.clear()
 
 def toggle_register_form():
     """"영화 등록" 버튼 콜백: 등록 폼을 펼치거나 접는 토글"""
@@ -122,8 +125,15 @@ def toggle_edit_form():
 # session_state는 브라우저 세션 동안 유지되는 저장소로, 여기 저장한 값은
 # 버튼을 눌러 스크립트가 다시 실행돼도 사라지지 않고 그대로 유지된다.
 # ---------------------------------------------------------
-if "view" not in st.session_state:
-    st.session_state.view = "list"           # 최초 진입 시 기본은 목록 화면
+query_movie_id = st.query_params.get("movie_id")
+
+if query_movie_id:
+    st.session_state.view = "detail"
+    st.session_state.selected_movie_id = int(query_movie_id)
+else:
+    st.session_state.view = "list"
+    st.session_state.pop("selected_movie_id", None)
+
 if "show_register_form" not in st.session_state:
     st.session_state.show_register_form = False
 
@@ -303,6 +313,8 @@ def render_detail_view():
                     delete_movie(movie_id)
                     st.success("삭제되었습니다.")
                     st.session_state.view = "list"
+                    st.session_state.pop("selected_movie_id", None)
+                    st.query_params.clear()
                     st.rerun()
                 except ApiError as e:
                     st.error(f"삭제 실패: {e.detail}")
